@@ -1,15 +1,15 @@
 {
   "name": "caua-pre-med-portfolio",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node server.mjs",
+    "dev": "node scripts/serve-local.mjs",
     "build": "node scripts/build.mjs",
-    "start": "node server.mjs --production",
     "test": "npm run build && node --test tests/*.test.mjs",
     "test:browser:offline": "python tests/browser_offline_smoke.py",
-    "test:browser:live": "python tests/browser_smoke.py"
+    "test:browser:live": "python tests/browser_smoke.py",
+    "serve:local": "node scripts/serve-local.mjs --production"
   },
   "engines": {
     "node": ">=20"

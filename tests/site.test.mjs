@@ -85,9 +85,9 @@ async function portFree(){return await new Promise((resolve,reject)=>{
  s.listen(0,'127.0.0.1',()=>{const port=s.address().port;s.close(()=>resolve(port));});
 });}
 
-test('production server serves pages and valid assets, 404s on missing static resources',async()=>{
+test('local production preview serves pages and assets, 404s on missing static resources',async()=>{
  const port=await portFree();
- const child=spawn(process.execPath,['server.mjs','--production'],{cwd:root,env:{...process.env,PORT:String(port)},stdio:'ignore'});
+ const child=spawn(process.execPath,['scripts/serve-local.mjs','--production'],{cwd:root,env:{...process.env,PORT:String(port)},stdio:'ignore'});
  try{
    let response;
    for(let i=0;i<35;i++){
@@ -112,4 +112,16 @@ test('production server serves pages and valid assets, 404s on missing static re
    const post=await fetch(`http://127.0.0.1:${port}/contact`,{method:'POST'});
    assert.equal(post.status,405);
  } finally {child.kill('SIGTERM');}
+});
+
+
+test('Vercel build is static and cannot infer a root Node server entrypoint',()=>{
+ const vercel=JSON.parse(read('vercel.json'));
+ assert.equal(vercel.buildCommand,'npm run build');
+ assert.equal(vercel.outputDirectory,'dist');
+ assert.ok(Array.isArray(vercel.rewrites));
+ assert.ok(!fs.existsSync(path.join(root,'server.mjs')));
+ assert.ok(!fs.existsSync(path.join(root,'src','server.mjs')));
+ assert.ok(!JSON.parse(read('package.json')).scripts.start);
+ assert.ok(fs.existsSync(path.join(root,'scripts','serve-local.mjs')));
 });

@@ -42,7 +42,7 @@ def main():
     port=unused_port()
     base=f'http://127.0.0.1:{port}'
     env=dict(os.environ, PORT=str(port))
-    server=subprocess.Popen(['node','server.mjs','--production'],cwd=ROOT,env=env,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
+    server=subprocess.Popen(['node','scripts/serve-local.mjs','--production'],cwd=ROOT,env=env,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
     failures=[]
     checked=0
     try:

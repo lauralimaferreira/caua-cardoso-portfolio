@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-const dir=path.dirname(fileURLToPath(import.meta.url));
+const dir=path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const prod=process.env.NODE_ENV==='production'||process.argv.includes('--production');
 const root=path.resolve(dir,prod?'dist':'.');
 const port=Number(process.env.PORT||3000);

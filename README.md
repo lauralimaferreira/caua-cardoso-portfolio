@@ -33,8 +33,8 @@ npm run dev
 To test and build the production files:
 
 ```bash
-npm test       # builds first and runs all nine Node tests
-npm start      # serves the dist/ build with SPA route fallback
+npm test       # builds first and runs all ten Node tests
+npm run serve:local  # serves the dist/ build with SPA route fallback
 ```
 
 The optional offline browser-rendering test uses Playwright for Python and a local Chromium installation (or the Playwright-installed Chromium):
@@ -59,15 +59,15 @@ For a full HTTP-driven Chromium smoke test, run `npm run test:browser:live` in a
 5. With explicit launch approval, remove `<meta name="robots" content="noindex, nofollow" />` from `index.html` and change the build script's `robots.txt` to `Allow: /`. **These flags are a courtesy to indexing robots, not access controls; do not deploy private material.**
 6. Run the tests, inspect the live Vercel site on mobile and desktop, and check image loading and direct links.
 
-## GitHub and Vercel (after approval)
+## GitHub and Vercel
 
-Create a new repository specifically for this project. Do not mix it with Admit Bloom or IMO Resource Hub. Upload the source files of this project folder; leave out ignored `dist/`, `.env`, and `previews/`.
+The repository is `lauralimaferreira/caua-cardoso-portfolio`. Do not mix it with Admit Bloom or IMO Resource Hub. Deploy the source files of this project folder; leave out ignored `dist/`, `.env`, and `previews/`.
 
-Import into Vercel with framework preset **Other**, build command `npm run build`, and output directory `dist`. A `vercel.json` is included for client-side routing.
+Import into Vercel with framework preset **Other**, build command `npm run build`, and output directory `dist`. A `vercel.json` is included for client-side routing. The local Node preview server lives at `scripts/serve-local.mjs` so Vercel will not detect it as a serverless backend; the deployed site is only the static `dist/` output.
 
 ## Railway (optional, after approval)
 
-The site does not need a database or backend for its current features. Vercel alone can host the frontend. If Railway is needed, create a separate project/service, link the same repository, set the build command to `npm run build` and start command to `npm start`, and configure a domain. The server reads Railway's `PORT` environment variable.
+The site does not need a database or backend for its current features. Vercel alone can host the frontend. If Railway is needed, create a separate project/service, link the same repository, set the build command to `npm run build` and start command to `npm run serve:local`, and configure a domain. The optional local preview server reads Railway's `PORT` environment variable, but it is not deployed to Vercel.
 
 ## Edit map
 
@@ -75,9 +75,9 @@ The site does not need a database or backend for its current features. Vercel al
 - `src/main.js`: routing, navigation, all page templates and interactions.
 - `src/styles.css`: design, typography and responsive breakpoints.
 - `public/assets/`: images and vector art. `portrait-reference.webp`, decorative microscope and decorative heart are still placeholders cropped from the supplied reference.
-- `tests/site.test.mjs`: automated source and production HTTP checks.
+- `tests/site.test.mjs`: automated source and local preview HTTP checks, including static-only Vercel checks.
 - `tests/browser_offline_smoke.py`: offline browser rendering and interactions.
 - `tests/browser_smoke.py`: optional real HTTP/browser tests for unrestricted environments.
 - `previews/`: rendered review screenshots (not committed by default).
 
-No changes were made to the v1 archive or any connected remote deployment service.
+The v1 archive remains unchanged. Changes in this version should be committed to the Cauã repository and deployed through its linked Vercel project.
