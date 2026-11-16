@@ -52,7 +52,7 @@ For a full HTTP-driven Chromium smoke test, run `npm run test:browser:live` in a
 
 ## Before approving publication
 
-1. Replace `public/assets/portrait-reference.webp` with a licensed/approved portrait of Cauã in sufficient resolution. Change the reference in `src/main.js`, remove the `figcaption` review badge, and confirm the appearance at mobile and desktop sizes.
+1. Replace `public/assets/portrait-reference.webp` with a licensed/approved portrait of Cauã in sufficient resolution. Change the reference in `src/site-client.js`, remove the `figcaption` review badge, and confirm the appearance at mobile and desktop sizes.
 2. Approve the public contact email; add it to `profile.email` in `src/data.js`, or keep the Contact page disabled if no public address is desired.
 3. Approve exactly which blog articles will be public. Currently, **no draft article bodies ship**. Add approved articles back individually, with links, after reviewing the final text.
 4. Confirm that academic, extracurricular, service and research information may be published; confirm current status as of the publication date.
@@ -72,7 +72,7 @@ The site does not need a database or backend for its current features. Vercel al
 ## Edit map
 
 - `src/data.js`: approved profile, research, activities, opportunities and upcoming blog topics.
-- `src/main.js`: routing, navigation, all page templates and interactions.
+- `src/site-client.js`: routing, navigation, all page templates and interactions.
 - `src/styles.css`: design, typography and responsive breakpoints.
 - `public/assets/`: images and vector art. `portrait-reference.webp`, decorative microscope and decorative heart are still placeholders cropped from the supplied reference.
 - `tests/site.test.mjs`: automated source and local preview HTTP checks, including static-only Vercel checks.

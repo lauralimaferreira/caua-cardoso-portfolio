@@ -10,7 +10,7 @@ import {profile, research, completedActivities, opportunities, blogIdeas} from '
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const main=read('src/main.js');
+const main=read('src/site-client.js');
 const css=read('src/styles.css');
 const html=read('index.html');
 const publicDir=path.join(root,'public');
@@ -101,7 +101,7 @@ test('local production preview serves pages and assets, 404s on missing static r
      assert.equal(r.status,200,`page failed: ${route}`);
      assert.match(r.headers.get('content-type'),/text\/html/);
    }
-   for(const route of ['/src/main.js','/src/styles.css','/assets/neuron-original.webp','/assets/lab-original.svg','/robots.txt']){
+   for(const route of ['/src/site-client.js','/src/styles.css','/assets/neuron-original.webp','/assets/lab-original.svg','/robots.txt']){
      const r=await fetch(`http://127.0.0.1:${port}${route}`);
      assert.equal(r.status,200,`asset failed: ${route}`);
    }
@@ -119,9 +119,15 @@ test('Vercel build is static and cannot infer a root Node server entrypoint',()=
  const vercel=JSON.parse(read('vercel.json'));
  assert.equal(vercel.buildCommand,'npm run build');
  assert.equal(vercel.outputDirectory,'dist');
+ assert.equal(vercel.framework,null);
+ assert.ok(!fs.existsSync(path.join(root,'src','main.js')));
+ assert.ok(fs.existsSync(path.join(root,'src','site-client.js')));
+ assert.ok(!fs.existsSync(path.join(root,'index.js')));
+ assert.ok(!fs.existsSync(path.join(root,'main.js')));
  assert.ok(Array.isArray(vercel.rewrites));
  assert.ok(!fs.existsSync(path.join(root,'server.mjs')));
  assert.ok(!fs.existsSync(path.join(root,'src','server.mjs')));
  assert.ok(!JSON.parse(read('package.json')).scripts.start);
  assert.ok(fs.existsSync(path.join(root,'scripts','serve-local.mjs')));
+ assert.ok(read('index.html').includes('/src/site-client.js'));
 });

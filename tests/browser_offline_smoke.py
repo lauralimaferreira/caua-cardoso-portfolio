@@ -33,7 +33,7 @@ def inline_assets(src):
 
 def javascript():
     data=(DIST/'src/data.js').read_text().replace('export const ','const ')
-    main=(DIST/'src/main.js').read_text()
+    main=(DIST/'src/site-client.js').read_text()
     main=re.sub(r'^import \{[^\n]+\n','',main, count=1)
     main=main.replace('location.pathname','window.__testPath')
     main=main.replace("history.pushState({},'',url.pathname)","window.__testPath=url.pathname")
