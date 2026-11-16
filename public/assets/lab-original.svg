@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Laboratory pipette over a Petri dish">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dfeffc"/><stop offset=".58" stop-color="#c2dcef"/><stop offset="1" stop-color="#91bad3"/></linearGradient>
+  <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f9fdff" stop-opacity=".93"/><stop offset=".5" stop-color="#73b4db" stop-opacity=".62"/><stop offset="1" stop-color="#2a78a9" stop-opacity=".82"/></linearGradient>
+  <linearGradient id="liquid" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#579fda"/><stop offset="1" stop-color="#173e81"/></linearGradient>
+  <radialGradient id="spot"><stop stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <filter id="blur"><feGaussianBlur stdDeviation="15"/></filter>
+</defs>
+<rect width="640" height="400" fill="url(#bg)"/>
+<g opacity=".53" filter="url(#blur)"><circle cx="60" cy="40" r="87" fill="#fff"/><circle cx="520" cy="355" r="125" fill="#2b739f"/><circle cx="400" cy="60" r="78" fill="#fff"/></g>
+<path d="M0 295Q320 245 640 305V400H0Z" fill="#7eacd1" opacity=".35"/>
+<ellipse cx="270" cy="290" rx="224" ry="76" fill="#286c9a" opacity=".18"/>
+<ellipse cx="283" cy="265" rx="210" ry="76" fill="url(#glass)" stroke="#effcff" stroke-width="10"/>
+<ellipse cx="283" cy="252" rx="179" ry="53" fill="#5eaddc" opacity=".46" stroke="#e5faff" stroke-width="5"/>
+<ellipse cx="283" cy="273" rx="170" ry="51" fill="none" stroke="#184b79" opacity=".33" stroke-width="4"/>
+<g fill="#1a659f" opacity=".55"><circle cx="183" cy="234" r="14"/><circle cx="292" cy="280" r="9"/><circle cx="347" cy="231" r="12"/><circle cx="415" cy="259" r="7"/><circle cx="241" cy="270" r="8"/></g>
+<g transform="rotate(35 405 80)"><rect x="376" y="-92" width="59" height="244" rx="13" fill="#dae5f1" stroke="#5085ad" stroke-width="7"/><rect x="387" y="-70" width="37" height="187" rx="5" fill="#fff" opacity=".7"/><rect x="390" y="27" width="31" height="80" fill="url(#liquid)" opacity=".8"/><rect x="365" y="-84" width="81" height="39" rx="13" fill="#334866"/><path d="M405 150l-17 90h34Z" fill="#e4f7ff" stroke="#4a88b5" stroke-width="6"/><path d="M405 174l-10 53h20Z" fill="#2b79ac" opacity=".6"/></g>
+<circle cx="487" cy="179" r="56" fill="url(#spot)"/><circle cx="133" cy="164" r="44" fill="url(#spot)"/>
+</svg>
