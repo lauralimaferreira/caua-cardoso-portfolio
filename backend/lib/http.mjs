@@ -1,5 +1,6 @@
 import {readFileSync} from 'node:fs';
 import { digest, equalText, newToken, readCookie, verifyPassword } from './security.mjs';
+import {validateProfile} from './profile-schema.mjs';
 import {attemptScope} from './rate-limit.mjs';
 const assets=new Map([
   ['/admin', ['text/html; charset=utf-8','index.html']],
@@ -7,14 +8,14 @@ const assets=new Map([
   ['/admin/styles.css',['text/css; charset=utf-8','styles.css']]
 ].map(([url,[type,file]])=>[url,[type,readFileSync(new URL('../public/'+file,import.meta.url))]]));
 class HttpError extends Error{constructor(status,message){super(message);this.status=status;}}
-async function jsonBody(req){
+async function jsonBody(req,maxBytes=4096){
   if((req.headers['content-type']||'').split(';')[0].trim().toLowerCase()!=='application/json')throw new HttpError(415,'JSON required');
   const length=Number(req.headers['content-length']||0);
-  if(length>4096)throw new HttpError(413,'Request too large');
+  if(length>maxBytes)throw new HttpError(413,'Request too large');
   const chunks=[];let size=0;
   // Drain oversized requests without storing extra bytes. HTTP timeouts cap slow requests.
-  for await(const chunk of req){size+=chunk.length;if(size<=4096)chunks.push(chunk);}
-  if(size>4096)throw new HttpError(413,'Request too large');
+  for await(const chunk of req){size+=chunk.length;if(size<=maxBytes)chunks.push(chunk);}
+  if(size>maxBytes)throw new HttpError(413,'Request too large');
   let value;try{value=JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch{throw new HttpError(400,'Invalid JSON');}
   if(!value||Array.isArray(value)||typeof value!=='object')throw new HttpError(400,'Invalid request');
   return value;
@@ -33,7 +34,25 @@ export function createHandler(config,store){
       if(pathname==='/healthz'&&req.method==='GET'){await store.healthy();return send(200,{status:'ok'});}
       if(pathname==='/'&&req.method==='GET'){res.writeHead(303,{Location:'/admin'});return res.end();}
       if(assets.has(pathname)&&['GET','HEAD'].includes(req.method)){const [type,bytes]=assets.get(pathname);res.writeHead(200,{'Content-Type':type});return res.end(req.method==='HEAD'?undefined:bytes);}
+      if(pathname==='/api/public/profile'){
+        if(req.method!=='GET'){res.setHeader('Allow','GET');return send(405,{error:'Method not allowed'});}
+        res.setHeader('Vary','Origin');
+        if(config.publicOrigin&&req.headers.origin===config.publicOrigin)res.setHeader('Access-Control-Allow-Origin',config.publicOrigin);
+        const record=await store.getProfile();return send(200,{profile:validateProfile(record.profile),revision:record.revision});
+      }
       const token=readCookie(req.headers.cookie,cookieName);
+      if(pathname==='/api/admin/profile'){
+        if(!['GET','POST'].includes(req.method)){res.setHeader('Allow','GET, POST');return send(405,{error:'Method not allowed'});}
+        if(!token||!await store.hasSession(digest(token),config.credentialVersion))return send(401,{error:'Session expired. Sign in again.'});
+        if(req.method==='GET')return send(200,await store.getProfile());
+        if(req.headers.origin!==config.origin)throw new HttpError(403,'Invalid origin');
+        const data=await jsonBody(req,32768);
+        if(Object.keys(data).length!==2||!Number.isInteger(data.revision)||data.revision<1||data.revision>=2147483647)throw new HttpError(400,'Invalid revision or request');
+        let profile;try{profile=validateProfile(data.profile);}catch(e){throw new HttpError(400,e.message);}
+        const result=await store.saveProfile(profile,data.revision);
+        if(!result)return send(409,{error:'Someone saved a newer version. Reload the latest content before saving.'});
+        return send(200,result);
+      }
       if(pathname==='/api/auth/session'&&req.method==='GET'){
         const authenticated=token&&await store.hasSession(digest(token),config.credentialVersion);
         if(!authenticated){if(token)res.setHeader('Set-Cookie',cookie('',0));return send(401,{authenticated:false});}

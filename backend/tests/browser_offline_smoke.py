@@ -1,35 +1,20 @@
-"""Offline UI test only: mocked API responses, no real cookie or database assertions."""
+"""Offline browser regression with mock API; no real database or HTTPS asserted."""
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
-import os
-root = Path(__file__).resolve().parents[1]
-html = (root/'public/index.html').read_text().replace('<link rel="stylesheet" href="/admin/styles.css">','').replace('<script src="/admin/login.js" defer></script>','')
-css = (root/'public/styles.css').read_text()
-js = (root/'public/login.js').read_text()
-output=os.environ.get('PHASE1_PREVIEW_DIR')
+import os,json
+root=Path(__file__).resolve().parents[1]
+html=(root/'public/index.html').read_text().replace('<link rel="stylesheet" href="/admin/styles.css">','').replace('<script src="/admin/login.js" defer></script>','')
+css=(root/'public/styles.css').read_text();js=(root/'public/login.js').read_text();seed=json.loads((root/'profile-default.json').read_text())
+output=os.environ.get('PHASE2_PREVIEW_DIR')
 with sync_playwright() as p:
-    browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH','/usr/bin/chromium'), args=['--no-sandbox'])
+    browser=p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH','/usr/bin/chromium'),args=['--no-sandbox'])
     for width,height in [(1440,900),(390,844),(320,640)]:
-        page=browser.new_page(viewport={'width':width,'height':height})
-        page.set_content(html)
-        page.add_style_tag(content=css)
-        page.evaluate('''() => {let authenticated=false; window.fetch=async(path,opts)=>{let status=200,data={};if(path.endsWith('/session')){status=authenticated?200:401;data={authenticated};}else if(path.endsWith('/login')){const body=JSON.parse(opts.body);authenticated=body.username==='caua'&&body.password==='mock-success';status=authenticated?200:401;data=authenticated?{authenticated:true}:{error:'Invalid username or password'};}else if(path.endsWith('/logout')){authenticated=false;data={authenticated:false};}return {status,ok:status===200,json:async()=>data};};}''')
-        page.add_script_tag(content=js)
-        expect(page.get_by_role('heading',name='Portfolio Login')).to_be_visible()
-        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page=browser.new_page(viewport={'width':width,'height':height});page.set_default_timeout(3000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.accept());page.set_content(html);page.add_style_tag(content=css)
+        page.evaluate('''seed=>{let auth=false;window.record={profile:seed,revision:1};window.failSave=false;window.fetch=async(path,opts)=>{let status=200,data={};if(path.endsWith('/session')){status=auth?200:401;}else if(path.endsWith('/login')){let b=JSON.parse(opts.body);auth=b.username==='caua'&&b.password==='mock-success';status=auth?200:401;data={error:'Invalid username or password'};}else if(path.endsWith('/logout')){auth=false;}else if(path.endsWith('/profile')){if(!auth){status=401;}else if(opts.method==='POST'){let b=JSON.parse(opts.body);if(window.failSave){status=503;data={error:'Save unavailable'};}else if(b.revision!==record.revision){status=409;data={error:'Someone saved a newer version.'};}else{window.record={profile:b.profile,revision:b.revision+1};data=record;}}else data=record;}return {status,ok:status===200,json:async()=>structuredClone(data)};};}''',seed)
+        page.add_script_tag(content=js);expect(page.get_by_role('heading',name='Portfolio Login')).to_be_visible();page.get_by_label('Password').fill('mock-success');page.get_by_role('button',name='Sign In').click();expect(page.locator('#saved-status')).to_contain_text('revision 1');assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         if output and width in (1440,390):
-            Path(output).mkdir(parents=True,exist_ok=True)
-            page.screenshot(path=str(Path(output)/f'login-{width}.png'))
-        page.get_by_label('Password').fill('wrong')
-        page.get_by_role('button',name='Sign In').click()
-        expect(page.locator('#message')).to_contain_text('Invalid username or password')
-        page.get_by_label('Password').fill('mock-success')
-        page.get_by_role('button',name='Sign In').click()
-        expect(page.get_by_role('heading',name='Welcome, Cauã!')).to_be_visible()
-        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
-        if output and width==1440:page.screenshot(path=str(Path(output)/'session-desktop.png'))
-        page.get_by_role('button',name='Sign Out').click()
-        expect(page.get_by_role('heading',name='Portfolio Login')).to_be_visible()
-        page.close()
-        print(f'PASS {width}x{height}: UI transitions with mocked API and responsive layout')
+            Path(output).mkdir(parents=True,exist_ok=True);page.screenshot(path=str(Path(output)/f'dashboard-{width}.png'),full_page=True)
+        page.locator('.sidebar [data-tab="home"]').click();expect(page.get_by_label('Introduction',exact=True)).to_have_value(seed['intro']);page.get_by_label('Introduction',exact=True).fill('New introduction');expect(page.locator('#saved-status')).to_have_text('Unsaved changes');page.locator('.sidebar [data-tab="profile"]').click();page.get_by_label('School',exact=True).fill('New school');page.get_by_label('Display name',exact=True).fill('Updated Student');page.locator('.sidebar [data-tab="about"]').click();page.get_by_label('Story title').fill('New story');assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        if output and width==1440:page.screenshot(path=str(Path(output)/'editor-desktop.png'),full_page=True)
+        page.evaluate('window.failSave=true');page.get_by_role('button',name='Save changes').click();expect(page.locator('#admin-message')).to_contain_text('Save unavailable');expect(page.get_by_label('Story title')).to_have_value('New story');page.evaluate('window.failSave=false');page.get_by_role('button',name='Save changes').click();expect(page.locator('#saved-status')).to_contain_text('revision 2');assert page.evaluate('record.profile.school')=='New school';assert page.evaluate('record.profile.intro')=='New introduction';expect(page.locator('#manager-name')).to_have_text('Updated');page.locator('.sidebar [data-tab="dashboard"]').click();expect(page.locator('#panel-title')).to_have_text('Welcome, Updated!');page.locator('.sidebar [data-tab="about"]').click();page.get_by_label('Story title').fill('Unsaved');page.get_by_role('button',name='Discard edits').click();expect(page.get_by_label('Story title')).to_have_value('New story');page.get_by_label('Story title').fill('Conflict');page.evaluate('record.revision=3');page.get_by_role('button',name='Save changes').click();expect(page.locator('#admin-message')).to_contain_text('newer version');page.get_by_role('button',name='Reload content').click();expect(page.locator('#saved-status')).to_contain_text('revision 3');page.get_by_role('button',name='Sign Out').click();expect(page.get_by_role('heading',name='Portfolio Login')).to_be_visible();assert not errors,errors;page.close();print(f'PASS {width}x{height}: login, editing, save, conflict, discard, logout',flush=True)
     browser.close()

@@ -24,7 +24,7 @@ test('navigation includes every planned public page',()=>{
 test('school year and research reflect the actual planning document',()=>{
  assert.equal(profile.school,'East Ridge High School');
  assert.equal(profile.schoolYear,'2026–2027');
- assert.match(main,/School Year<\/strong><span>\$\{esc\(profile.schoolYear\)\} · Junior/);
+ assert.match(main,/School Year<\/strong><span>\$\{esc\(profile.schoolYear\)\} · \$\{esc\(shortGrade\(profile.grade\)\)\}/);
  assert.ok(research.title.includes('Teenagers’ Public Health Knowledge After COVID-19'));
  assert.equal(main.includes('2026 (Junior)'),false);
  assert.equal(main.includes('Brazos Valley'),false);
@@ -95,7 +95,7 @@ test('local production preview serves pages and assets, 404s on missing static r
    }
    assert.ok(response,'server did not start');
    assert.equal(response.status,200);
-   assert.match(await response.text(),/Cauã Cardoso/);
+   assert.match(await response.text(),/Pre-Med Portfolio/);
    for(const route of ['/about','/research','/blog','/resume','/contact','/extracurriculars']){
      const r=await fetch(`http://127.0.0.1:${port}${route}`);
      assert.equal(r.status,200,`page failed: ${route}`);
@@ -130,4 +130,15 @@ test('Vercel build is static and cannot infer a root Node server entrypoint',()=
  assert.ok(!JSON.parse(read('package.json')).scripts.start);
  assert.ok(fs.existsSync(path.join(root,'scripts','serve-local.mjs')));
  assert.ok(read('index.html').includes('/src/site-client.js'));
+});
+
+test('public profile defaults and shared validation match backend, no secrets shipped',async()=>{
+ const {defaultProfile}=await import('../src/profile-default.js');
+ assert.deepEqual(defaultProfile,JSON.parse(read('backend/profile-default.json')));
+ assert.equal(read('src/profile-schema.js'),read('backend/lib/profile-schema.mjs'));
+ assert.ok(!fs.existsSync(path.join(root,'dist','backend')));
+ assert.ok(!fs.existsSync(path.join(root,'dist','src','server.mjs')));
+ assert.match(main,/credentials:'omit'/);
+ assert.match(main,/profile=validateProfile\(data.profile\)/);
+ assert.match(main,/Portfolio temporarily unavailable/);
 });

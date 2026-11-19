@@ -39,5 +39,8 @@ export function configFromEnv(env=process.env) {
   if (!['direct','railway-edge'].includes(clientIpMode) || (!dev && clientIpMode !== 'railway-edge')) throw new Error('AUTH_CLIENT_IP_MODE must be railway-edge in production (direct allowed in development)');
   const port = Number(env.PORT || 3000);
   if (!Number.isInteger(port) || port<1 || port>65535) throw new Error('Invalid PORT');
-  return { clientIpMode, origin:url.origin, secure:url.protocol==='https:', username,passwordHash,credentialVersion:digest(`${username}\0${passwordHash}`), dbUrl:env.DATABASE_URL,port,sessionSeconds:43200 };
+  const publicOrigin=env.PUBLIC_SITE_ORIGIN || 'https://caua-cardoso-portfolio.vercel.app';
+  const publicUrl=new URL(publicOrigin);
+  if(publicUrl.origin!==publicOrigin||publicUrl.username||publicUrl.password||(publicUrl.protocol!=='https:'&&!(dev&&publicUrl.protocol==='http:'&&['localhost','127.0.0.1','[::1]'].includes(publicUrl.hostname))))throw Error('PUBLIC_SITE_ORIGIN must be an exact HTTPS origin');
+  return { publicOrigin, clientIpMode, origin:url.origin, secure:url.protocol==='https:', username,passwordHash,credentialVersion:digest(`${username}\0${passwordHash}`), dbUrl:env.DATABASE_URL,port,sessionSeconds:43200 };
 }

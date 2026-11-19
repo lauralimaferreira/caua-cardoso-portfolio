@@ -1,20 +1,8 @@
 // Facts from the "Caua Cardoso" planning document (reviewed 2026-11-16).
 // Future opportunities remain separate from completed activities. Do not silently
 // promote planned competitions, draft articles, or research milestones to awards.
-export const profile = {
-  name: 'Cauã Cardoso',
-  fullName: 'Cauã Pereira Dantas Dourado Cardoso',
-  subtitle: 'Pre-Med Portfolio',
-  school: 'East Ridge High School',
-  grade: 'High School Junior',
-  schoolYear: '2026–2027',
-  location: 'Clermont, Florida',
-  intendedField: 'Medicine (MD)',
-  interests: ['Biology', 'Public Health', 'Medicine', 'Health Education'],
-  quote: 'Determination is what I value in a great doctor.',
-  email: '', // Approved public email only; empty disables contact actions.
-  intro: 'I’m Cauã, a high school junior interested in biology, medicine, and service. I hope to become a physician who keeps learning and makes a difference in patients’ lives.',
-};
+import { defaultProfile } from './profile-default.js';
+export const profile = {...defaultProfile, subtitle:'Pre-Med Portfolio'};
 
 export const research = {
   title: 'Teenagers’ Public Health Knowledge After COVID-19',

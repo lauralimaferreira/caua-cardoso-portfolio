@@ -21,3 +21,23 @@
 .contact-state h2{margin-bottom:10px}
 .contact-disabled-note{display:inline-block;margin-top:10px;padding:10px 13px;border-radius:8px;border:1px solid #e4e9ec;color:#6e7985;font-size:12px;font-weight:700}
 @media(max-width:700px){.portrait-review-label{bottom:7px;font-size:9px}.contact-state{min-height:260px}}
+.admin-link{color:#345d76;text-decoration:underline;text-underline-offset:3px}.content-offline{font-size:.84rem;color:#53647a;padding-block:8px}.hero-copy h1 span,.hero-copy p,.hero-info-card,.story-card,.goals-card,.narrative-band{overflow-wrap:anywhere}
+
+/* Phase 2 V2: public text can grow without escaping its grid or card. */
+#app{overflow-wrap:anywhere}
+.site-header{height:auto;min-height:91px;padding-block:8px}
+.brand>span,.site-footer>div,.resume-top>div,.detail-list span,.fact-row>div,.goals-card li>span{min-width:0;max-width:100%}
+.brand img{flex-shrink:0}.brand small{white-space:normal}
+.home-hero{height:auto;min-height:381px;grid-template-columns:minmax(0,36fr) minmax(0,32fr) minmax(0,32fr)}
+.home-hero>*{min-width:0;max-width:100%}
+.hero-copy{padding-bottom:12px}.hero-copy h1 .long-headline{font-size:.68em;line-height:1.08;letter-spacing:-.035em}
+.hero-buttons{flex-wrap:wrap;white-space:normal;gap:10px}.hero-buttons .action-btn{max-width:100%}
+.portrait-wrap{max-width:none}.portrait-wrap img{max-width:100%;object-fit:contain}
+.hero-info-card{height:auto;min-height:295px;grid-template-columns:minmax(0,52fr) minmax(0,48fr)}
+.hero-facts{min-width:0;gap:12px}.hero-quote{min-width:0;padding-bottom:6px}.signature{max-width:100%;overflow-wrap:anywhere}.signature-long{transform:none;font-size:23px}
+.content-card,.narrative-band,.resume-sheet,.pill-row span,.contact-layout>*,.two-col>*{min-width:0;max-width:100%}
+.contact-layout{grid-template-columns:repeat(2,minmax(0,1fr))}.resume-top .action-btn{flex-shrink:0}.profile-status{min-height:70vh;padding-block:64px;color:var(--navy)}.profile-status h1{font-family:Georgia,serif;font-size:clamp(28px,5vw,50px)}
+@media(max-width:1250px) and (min-width:1001px){.desktop-nav{gap:clamp(8px,1.4vw,18px)}.site-header{grid-template-columns:minmax(0,215px) minmax(0,1fr) 136px}.hero-info-card{grid-template-columns:1fr;gap:12px}.hero-quote{border-left:0;border-top:1px solid #edf0f3;padding:10px 0 6px}.hero-facts{padding-right:0}}
+@media(max-width:1000px){.site-header{min-height:78px}.home-hero{min-height:0;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}.hero-info-card{min-height:170px;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}.hero-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.header-actions{flex-shrink:0}}
+@media(max-width:700px){.site-header{min-height:73px}.hero-info-card,.contact-layout{grid-template-columns:minmax(0,1fr)}.hero-copy{padding-bottom:0}.hero-info-card{width:100%}.portrait-wrap{max-width:100%}.resume-top .action-btn{max-width:100%}}
+@media(max-width:410px){.hero-facts{grid-template-columns:minmax(0,1fr)}}

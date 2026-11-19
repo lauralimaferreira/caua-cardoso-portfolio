@@ -34,4 +34,12 @@ test('real PostgreSQL: migrations, concurrent limiter, persistence, expiry and r
   assert.equal(await store.hasSession('a'.repeat(64),'b'.repeat(64)),false);
   await store.createSession('d'.repeat(64),'b'.repeat(64),0);
   assert.equal(await store.hasSession('d'.repeat(64),'b'.repeat(64)),false);
+  const baseline=await store.getProfile();assert.equal(baseline.revision,1);
+  const changed={...baseline.profile,intro:'Integration test profile'};
+  const saves=await Promise.all([store.saveProfile(changed,1),store.saveProfile({...changed,intro:'Concurrent edit'},1)]);
+  assert.equal(saves.filter(Boolean).length,1);
+  const saved=saves.find(Boolean);await store.migrate();
+  const readPool=new Pool({connectionString:url,options:`-c search_path=${schema}`,max:2});
+  try{const after=await postgresStore(readPool).getProfile();assert.equal(after.revision,2);assert.deepEqual(after.profile,saved.profile);}finally{await readPool.end();}
+
 });

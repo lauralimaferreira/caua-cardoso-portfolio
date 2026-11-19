@@ -32,9 +32,12 @@ def inline_assets(src):
 
 
 def javascript():
-    data=(DIST/'src/data.js').read_text().replace('export const ','const ')
-    main=(DIST/'src/site-client.js').read_text()
-    main=re.sub(r'^import \{[^\n]+\n','',main, count=1)
+    def standalone(name):
+        source=(DIST/'src'/name).read_text()
+        return re.sub(r'^import [^\n]+\n','',source,flags=re.M).replace('export const ','const ').replace('export function ','function ')
+    data='\n'.join(standalone(name) for name in ['profile-default.js','profile-schema.js','site-settings.js','data.js'])
+    data=data.replace('const profile = {...defaultProfile, subtitle:\'Pre-Med Portfolio\'};','')
+    main=standalone('site-client.js')
     main=main.replace('location.pathname','window.__testPath')
     main=main.replace("history.pushState({},'',url.pathname)","window.__testPath=url.pathname")
     main=main.replace('if(url.origin!==location.origin)return;',"if(url.origin!=='https://offline.local')return;")
@@ -54,6 +57,7 @@ def check():
         try:
             for width,height,kind in [(1600,900,'desktop'),(390,844,'mobile'),(320,700,'small-mobile')]:
                 page=browser.new_page(viewport={'width':width,'height':height})
+                page.set_default_timeout(3500)
                 page.on('pageerror',lambda e: errors.append(str(e)))
                 page.set_content('<!doctype html><html><head><meta charset="UTF-8"/><base href="https://offline.local/" /></head><body><div id="app"></div></body></html>')
                 page.add_style_tag(content=css)
@@ -71,6 +75,7 @@ def check():
                         if not image.evaluate('i=>i.complete && i.naturalWidth>0'):
                             errors.append(f'Image broken on {kind} {route}: {image.get_attribute("src")[:50]}')
                     results.append(f'{kind}:{route}')
+                    print(f'PASS {kind}:{route}',flush=True)
                 page.evaluate("window.__testPath='/';window.dispatchEvent(new Event('popstate'))")
                 if kind=='desktop':
                     page.screenshot(path=str(OUT/'home-desktop.png'),full_page=True)
@@ -79,7 +84,7 @@ def check():
                     assert page.evaluate('window.__testPath')=='/research'
                 elif kind=='mobile':
                     page.screenshot(path=str(OUT/'home-mobile.png'),full_page=True)
-                    toggle=page.get_by_role('button',name='Open menu')
+                    toggle=page.locator('#menuToggle')
                     toggle.click()
                     assert toggle.get_attribute('aria-expanded')=='true'
                     page.locator('#mobileMenu').get_by_role('link',name='Research').click()
