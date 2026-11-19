@@ -4,3 +4,7 @@ dist/
 .DS_Store
 *.log
 previews/
+
+# Local backend secrets, including development variants
+.env.*
+!.env.example
